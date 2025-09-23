@@ -1,0 +1,54 @@
+# RPM by event type (last 2h)
+SELECT date_trunc('minute', to_timestamp(ts)) AS minute,
+       event,
+       count(*) AS cnt
+FROM events
+WHERE ts >= EXTRACT(EPOCH FROM (now() - interval '2 hours'))
+GROUP BY 1,2
+ORDER BY 1;
+
+# Active sessions (last 5 min)
+SELECT count(DISTINCT session_id) AS active_sessions
+FROM events
+WHERE ts >= EXTRACT(EPOCH FROM (now() - interval '5 minutes'));
+
+# Top videos (last 24h)
+SELECT video_id,
+       count(*) FILTER (WHERE event='start') AS starts,
+       count(*) FILTER (WHERE event='stop')  AS stops
+FROM events
+WHERE ts >= EXTRACT(EPOCH FROM (now() - interval '24 hours'))
+GROUP BY 1
+ORDER BY starts DESC
+LIMIT 10;
+
+# Autoscaling markers & node count (derive)
+WITH marks AS (
+  SELECT date_trunc('minute', to_timestamp(ts)) AS minute,
+         sum(CASE WHEN event='scale_up' THEN 1
+                  WHEN event='scale_down' THEN -1 ELSE 0 END) AS delta
+  FROM events
+  WHERE event IN ('scale_up','scale_down')
+  GROUP BY 1
+)
+SELECT minute,
+       sum(delta) OVER (ORDER BY minute ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS node_count
+FROM marks
+ORDER BY minute;
+
+
+# Whitelist compliance (last 24h)
+SELECT 100.0 * avg(CASE WHEN event IN
+  ('connect','start','pause','play','seek','stop','stream_tick_10s','scale_up','scale_down')
+  THEN 1 ELSE 0 END) AS whitelist_compliance_pct
+FROM events
+WHERE ts >= EXTRACT(EPOCH FROM (now() - interval '24 hours'));
+
+# Session presence by category (user vs system)
+SELECT
+  100.0 * avg(CASE
+    WHEN event IN ('scale_up','scale_down') THEN 1           -- system: session_id may be NULL
+    WHEN session_id IS NOT NULL THEN 1                        -- user: must have session
+    ELSE 0 END) AS session_presence_compliance_pct
+FROM events
+WHERE ts >= EXTRACT(EPOCH FROM (now() - interval '24 hours'));

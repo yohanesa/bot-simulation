@@ -1,0 +1,35 @@
+# run db first
+docker compose up --build db
+
+# create credential for metabase
+# the user and password named: events for now
+psql -h localhost -p 5432 -U events -d events 
+
+#on shell write:
+CREATE USER metabase WITH PASSWORD 'metabase';
+CREATE DATABASE metabase OWNER metabase;
+GRANT ALL PRIVILEGES ON DATABASE metabase TO metabase;
+
+# run all services
+docker compose up --build  (or -d for daemon)
+
+# open all UI pages:
+http://localhost:8080/ui
+http://localhost:8082/admin/ui
+http://localhost:8083/dash
+
+# go to Orchestrator GUI
+# click Start to start bot
+# you can monitor the actions on Streaming Server Admin and EventStore Dashboard
+
+# To activate metabase
+http://localhost:4000
+
+# queries for metabase is on:
+/scripts/queries.txt
+
+# for now I cannot provide automatic script for metabase because the time is running out
+# now 3:09 am. 
+
+# anything you need don't hesitate to poke me.
+# thanks

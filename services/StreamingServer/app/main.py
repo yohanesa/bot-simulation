@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers.api import router as api_router
 from .routers.admin import router as admin_router
+from .routers.admin_ui import router as admin_ui_router
 from .services.events import EventEmitter
 from .services.cluster import Cluster
 from .services.sessions import Sessions
@@ -17,6 +18,7 @@ app.add_middleware(
 
 app.include_router(api_router)
 app.include_router(admin_router)
+app.include_router(admin_ui_router)
 
 @app.get("/healthz")
 async def healthz():

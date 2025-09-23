@@ -28,8 +28,4 @@ http://localhost:4000
 # queries for metabase is on:
 /scripts/queries.txt
 
-# for now I cannot provide automatic script for metabase because the time is running out
-# now 3:09 am. 
-
-# anything you need don't hesitate to poke me.
-# thanks
+# Milestone 4 is live (DB persists, EventStore + Orchestrator + UIs). Install/run steps are in installation.txt. I couldn’t wrap the Metabase automation script tonight—time’s up and I need to rest—but Metabase works via the UI and the manual steps are included. If you need anything, just ping me. Thanks!

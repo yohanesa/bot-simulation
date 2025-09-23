@@ -1,0 +1,32 @@
+curl -s -X POST 'http://localhost:8080/config' -H 'Content-Type: application/json' \
+  -d '{"height":8,"width":24,"error_factor":0.0}' | jq
+curl -s -X POST 'http://localhost:8080/loop/interval?interval_ms=500' -H 'Content-Type: application/json' -d '{}' | jq
+curl -s -X POST 'http://localhost:8080/loop/start' -H 'Content-Type: application/json' -d '{}' | jq
+curl -s 'http://localhost:8080/' | jq
+
+# Tes simulator langsung dari host
+curl -i -X POST http://localhost:8081/simulate \
+  -H 'Content-Type: application/json' \
+  -d '{"error_factor":0.0}'
+
+# Lihat log StreamingServer (harus ada stream_start/play/tick)
+docker compose logs -f streaming-server
+
+# Start loop Orchestrator
+curl -s -X POST http://localhost:8080/config -H 'Content-Type: application/json' \
+  -d '{"height":8,"width":24,"error_factor":0.0}' | jq
+curl -s -X POST "http://localhost:8080/loop/interval?interval_ms=500" -H 'Content-Type: application/json' -d '{}' | jq
+curl -s -X POST http://localhost:8080/loop/start -H 'Content-Type: application/json' -d '{}' | jq
+
+
+# connect
+curl -s -X POST localhost:8082/connect -H 'Content-Type: application/json' \
+  -d '{"session_id":"s1","user_id":"u1","video_id":"v42","position":0}' | jq
+
+# play → akan memicu stream_tick_10s
+curl -s -X POST localhost:8082/action -H 'Content-Type: application/json' \
+  -d '{"session_id":"s1","type":"play","position":0}' | jq
+
+# admin
+curl -s localhost:8082/admin/nodes | jq
+curl -s localhost:8082/admin/metrics | jq

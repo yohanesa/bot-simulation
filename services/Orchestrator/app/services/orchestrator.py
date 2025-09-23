@@ -2,6 +2,8 @@ from dataclasses import dataclass
 import math
 import random
 import httpx
+from app.core.settings import settings
+
 
 @dataclass
 class OrchestratorConfig:
@@ -14,7 +16,7 @@ class OrchestratorService:
         self.cfg = OrchestratorConfig()
         self.tick = 0
         self.spawned_total = 0
-        self.user_sim_url = "http://0.0.0.0:8000/simulate"  # env or settings
+        self.user_sim_url = settings.user_sim_url
 
     def set_config(self, height: int, width: int, error_factor: float):
         self.cfg.height = max(1, int(height))
@@ -44,11 +46,14 @@ class OrchestratorService:
             for _ in range(planned):
                 payload = {"error_factor": self.cfg.error_factor}
                 try:
-                    resp = await client.post(self.user_sim_url, json=payload)
+                    print(f"{self.user_sim_url} and payload {str(payload)}")
+                    resp = await client.post(
+                        f"{self.user_sim_url}/simulate",
+                        json=payload)
                     resp.raise_for_status()
                     spawned += 1
                 except Exception:
-                    # TODO: log; you can increment error counters here
+                    print("failed to call usersim server")
                     pass
         self.tick += 1
         self.spawned_total += spawned

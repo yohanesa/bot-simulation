@@ -1,19 +1,20 @@
-import random, time
-from fastapi import FastAPI, Request
-from pydantic import BaseModel
-from app.services.user import simulate_session
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from .models import SimIn
+from .services.simulator import simulate_session
 
-app = FastAPI(title="User Simulator")
+app = FastAPI(title="UserSimulator")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], allow_credentials=True,
+    allow_methods=["*"], allow_headers=["*"],
+)
 
-ACTIONS = ["video_start", "video_pause", "video_resume", "seek", "page_leave", "session_end"]
-
-class SimIn(BaseModel):
-    error_factor: float = 0.0
-
-@app.get("/")
-def root():
-    return {"service": "user-simulator"}
+@app.get("/healthz")
+def healthz():
+    return {"ok": True}
 
 @app.post("/simulate")
-def simulate(request:Request, inp: SimIn):
-    return simulate_session(inp.error_factor)
+async def simulate(inp: SimIn):
+    # Run ONE session and return a summary
+    return await simulate_session(inp.error_factor)

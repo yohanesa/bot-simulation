@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   streaming-server:
-    build: ./services/StreamingServer
+    build: ./StreamingServer
     ports:
       - "8082:8000"                     # host:container
     environment:
@@ -15,7 +15,7 @@ services:
     restart: unless-stopped
 
   user-simulator:
-    build: ./services/UserSimulator
+    build: ./UserSimulator
     # container_name: user-simulator   # (opsional) sebaiknya dihapus biar DNS default mulus
     ports:
       - "8081:8000"
@@ -28,7 +28,7 @@ services:
     restart: unless-stopped
 
   orchestrator:
-    build: ./services/Orchestrator
+    build: ./Orchestrator
     # container_name: orchestrator     # (opsional) sebaiknya dihapus
     ports:
       - "8080:8000"

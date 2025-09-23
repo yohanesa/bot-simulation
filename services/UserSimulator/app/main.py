@@ -1,5 +1,5 @@
 import random, time
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from pydantic import BaseModel
 from app.services.user import simulate_session
 
@@ -15,5 +15,5 @@ def root():
     return {"service": "user-simulator"}
 
 @app.post("/simulate")
-def simulate(inp: SimIn):
+def simulate(request:Request, inp: SimIn):
     return simulate_session(inp.error_factor)
